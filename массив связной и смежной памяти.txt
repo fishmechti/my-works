@@ -1,0 +1,150 @@
+#pragma GCC optimize("Ofast")
+#pragma GCC optimize("unroll-loops")
+#pragma GCC target("sse,sse2,sse3,ssse3,abm,mmx,tune=native")
+
+#include <iostream>
+#include <cmath>
+#include <iomanip>
+#include <vector>
+#include <map>
+#include <algorithm>
+#include <list>
+#include <stdio.h>
+#include <stdlib.h>
+#include <set>
+#include <stack>
+#include <queue>
+#include <deque>
+#include <string>
+#include <time.h>
+#include <list>
+
+using namespace std;
+
+typedef long long ll;
+
+void boostIO() {
+	ios_base::sync_with_stdio(false);
+	cout.tie(0);
+	cin.tie(0);
+}
+
+template<typename T> T getint() {
+	T val = 0;
+	char c;
+
+	bool neg = false;
+	while ((c = getchar()) && !(c >= '0' && c <= '9')) {
+		neg |= c == '-';
+	}
+
+	do {
+		val = (val * 10) + c - '0';
+	} while ((c = getchar()) && (c >= '0' && c <= '9'));
+
+	return val * (neg ? -1 : 1);
+}
+
+const int sz = 10000;
+
+class trees
+{
+public:
+	vector<int> tree;
+	trees(int x) {
+		tree.resize(sz, -100);
+		tree[1] = x;
+	}
+
+	void _add(int value) {
+		int now = 1;
+		while (tree[now] != -100 && tree[now] != value) {
+			if (tree[now] > value&& tree[now * 2] == -100) {
+				tree[now * 2] = value;
+				return;
+			}
+			if (tree[now] < value && tree[now * 2 + 1] == -100) {
+				tree[now * 2 + 1] = value;
+				return;
+			}
+			if (tree[now] > value)
+				now = 2 * now;
+			else now = 2 * now + 1;
+		}
+	}
+
+	void _delete(int value) {
+		int ind = 0, k = 2;
+		for (int i = 1; i < sz; ++i)
+			if (tree[i] == value) {
+				ind = i;
+				break;
+			}
+		tree[ind] = -100;
+		if (tree[2 * ind] != -100 || tree[2 * ind + 1] != -100) {
+			while (ind < sz) {
+				for (int i = 0; i < k; ++i)
+					tree[2 * ind + i] = -100;
+				k *= 2;
+				ind *= 2;
+
+				int cnt = 0;
+				for (int i = 0; i < k; ++i)
+					if (tree[2 * ind + i] == -100) ++cnt;
+				if (cnt == k) break;
+			}
+		}
+	}
+
+	void _view(int now){
+		if (tree[now] != -100){
+			_view(now * 2);
+
+			if (tree[now * 2] != -100)
+				cout << tree[now] << " " << tree[now * 2] << endl;
+			if (tree[now * 2 + 1] != -100)
+				cout << tree[now] << " " << tree[now * 2 + 1] << endl;
+
+			_view(now * 2 + 1);
+		}
+	}
+};
+
+int main() {
+	boostIO();
+	setlocale(LC_ALL, "Russian");
+	cout << "Введите корень дерева:\n";
+	int x; cin >> x;
+	trees my_tree(x);
+	system("CLS");
+	while (true) {
+		char ch;
+		while (true) {
+			cout << "Введите 1 для добавления элемента.\n";
+			cout << "Введите 2 для удаления элемента.\n";
+			cout << "Введите 3 для просмотра дерева.\n";
+			cout << "Введите 4 для выхода.\n";
+			cin >> ch;
+			system("CLS");
+			if (ch >= '1' && ch <= '4') break;
+			else cout << "Неверные данные!\n\n";
+		}
+		if (ch == '1') {
+			cout << "Введите элемент:\n";
+			int value; cin >> value;
+			my_tree._add(value);
+		}
+		if (ch == '2') {
+			cout << "ВНИМАНИЕ!\nПри удалении вершины удаляется все поддерево, выхоящее из этой вершины.\n";
+			cout << "Введите элемент:\n";
+			int value; cin >> value;
+			my_tree._delete(value);
+		}
+		if (ch == '3')
+			my_tree._view(1);
+		if (ch == '4')
+			return 0;
+		if (ch != '3')
+			system("CLS");
+	}
+}
